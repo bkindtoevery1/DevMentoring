@@ -1,0 +1,28 @@
+{% extends 'show_board.html' %}
+
+{% block contents %}
+<table border = "1">
+    <tr>
+        <div style=" float: left; text-align:center; padding: 30px;">
+            <td>제목 : {{data[0]}}</td>
+        </div>
+        <div style=" float: left; text-align:center; padding: 30px;">
+            <td>작성자 : {{data[1]}}</td>
+        </div>
+        <div style=" float: left; text-align:center; padding: 30px;">
+            <td>좋아요 : {{data[2]}}</td>
+        </div>
+    </tr>
+    <tr>
+        <div style=" float: left; text-align:center; padding: 10px; width:300px; height:200px;">
+            <td colspan="3">{{data[3]}}</td>
+        </div>
+    </tr>
+</table>
+    {% if data[1] == user_id %}
+        <button onclick=" location.href='/main/{{user_id}}/{{board_type}}/rewrite/{{post_num}}}'">수정하기</button>
+        <form method = 'POST' action = '/main/{{user_id}}/{{board_type}}/delete/{{post_num}}'>
+            <button type = 'submit'>삭제하기</button>
+        </form>
+    {% endif %}
+{% endblock %}

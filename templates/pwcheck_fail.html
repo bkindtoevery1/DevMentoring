@@ -1,0 +1,14 @@
+<html>
+    <head>
+        {% block message %}
+        <script>
+            alert("Password and Password check are different.")
+        </script>
+        {% endblock %}
+        <meta http-equiv="refresh" content="0;url=http://localhost:5000/sign_up" />
+    </head>
+</html>
+
+<!-- 사실 meta로 다시 sign_up page로 돌아갈랬지만 안돌아가고 멈춰서 script로 바꿈
+     window.location.href = 'http://localhost:5000/sign_up'
+    이게 원인인줄 알았는데 그냥 앞에 http를 안붙여서 그랬던거임 ㅋㅋㅋㅋㅋㅋ-->
