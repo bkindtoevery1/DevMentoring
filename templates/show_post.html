@@ -20,7 +20,7 @@
     </tr>
 </table>
     {% if data[1] == user_id %}
-        <button onclick=" location.href='/main/{{user_id}}/{{board_type}}/rewrite/{{post_num}}}'">수정하기</button>
+        <button onclick=" location.href='/main/{{user_id}}/{{board_type}}/rewrite/{{post_num}}'">수정하기</button>
         <form method = 'POST' action = '/main/{{user_id}}/{{board_type}}/delete/{{post_num}}'>
             <button type = 'submit'>삭제하기</button>
         </form>
