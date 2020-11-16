@@ -1,6 +1,7 @@
 from flask import Flask, request, url_for, redirect, render_template, send_file
-import os, time
+import os, time, threading
 
+lock = threading.Lock()
 app = Flask(__name__)
 #app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 #16메가바이트
 
@@ -118,9 +119,11 @@ def add_post(user_id, board_type, Title=None, Content=None):
     content = request.form['Content']
     post_num = -1
     if board_type == 'cookie':
+        lock.acquire()
         cookie_count += 1
         time.sleep(5)
         post_num = cookie_count
+        lock.release()
     elif board_type == 'free':
         free_count += 1
         time.sleep(5)
