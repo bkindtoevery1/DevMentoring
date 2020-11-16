@@ -1,0 +1,10 @@
+{% extends 'show_board.html' %}
+{% block contents %}
+<form method = "POST" action = '/main/{{user_id}}/{{board_type}}/add_post'>
+    <label for="Title">제목 : </label></br>
+    <input type = "text" placeholder = "제목" name = "Title" required> </br>
+    <label for="Content">작성할 내용 : </label></br>
+    <input type = "text" placeholder = "자유롭게 작성하세요!" name = "Content" style="width:300px;height:200px;" required> </br>
+    <button type = "submit">작성하기</button>
+</form>
+{% endblock %}

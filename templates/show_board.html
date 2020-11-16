@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <h1> My project board page</h1>
+    <h2>Welcome, {{user_id}}!</h2>
+    <button type="button" onclick="location.href='http://localhost:5000/logout'">로그아웃</button></br>
+    <div style="border: 1px solid gold; float: left; text-align:center; width: 10%"><a href = /main/{{user_id}}/free>자유게시판</a></div>
+    <div style="border: 1px solid gold; text-align:center; width: 10%"><a href = /main/{{user_id}}/cookie>쿠키런게시판</a></div>
+    {%block contents %}
+    <div style="text-align:center; float:right; width: 85%;">
+    <table border = "1">
+        <tr>
+            <td width = "10%">글 번호</td>
+            <td width = "60%">제목</td>
+            <td width = "20%">글쓴이</td>
+            <td width = "10%">좋아요 수</td>
+        </tr>
+        {% if num == 0 %}
+            <tr>
+                <td colspan = "4" valign = "middle">게시글이 없습니다.</td>
+            </tr>
+        {% else %}
+            {% for key, value in data.items() %}
+            <tr>
+                <td>{{key}}</td>
+                <td><a href = "http://localhost:5000/main/{{user_id}}/{{board_type}}/{{key}}">{{value[0]}}</a></td>
+                <td>{{value[1]}}</td>
+                <td>{{value[2]}}</td>
+            </tr>
+            {% endfor %}
+        {% endif %}
+    </table>
+    </div>
+    <button type = "button" onclick="location.href='http://localhost:5000/main/{{user_id}}/{{board_type}}/write'">글 쓰기</button>
+    {% endblock %}
+</html>
