@@ -1,11 +1,15 @@
 from flask import Flask, request, url_for, redirect, render_template, send_file
 import os, time, threading
+import sqlite3
 
 lock = threading.Lock()
+
+# Create Database Session
+DB_NAME = "dev_montoring.db"
+
 app = Flask(__name__)
 #app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 #16메가바이트
 
-accounts = {'admin':'brave', 'a':'a'} #a,a는 빠른 테스트를 위한 가계정
 cookie = {1 : ['떼탈출 언제하지..', 'a', 0, '떼탈출 재밌긴 한데.. 살짝 귀찮음'], 2 : ['그챔 끝!', 'a', 0, '명랑한 쿠키양은 명랑했다.']}
 cookie_count = 2
 free = {}
@@ -36,10 +40,20 @@ def add_account(ID=None, PW=None, PWcheck=None):
         pwcheck = request.form['PWcheck']
         if pw != pwcheck: #아이디 존재여부보다 이거먼저하는게 보안에 좀 더 나을듯
             return render_template('pwcheck_fail.html')
-        if not id in accounts:
-            accounts[id] = pw
-        else:
+        # Account가 존재하는지?
+        conn = sqlite3.connect(DB_NAME)
+        curr = conn.cursor()
+
+        account = curr \
+            .execute(f"SELECT id FROM account WHERE id = '{id}'") \
+            .fetchone()
+        if account:
+            conn.close()
             return render_template('duplicate_id.html')
+        else:
+            curr.execute(f"INSERT INTO account VALUES ('{id}', '{pw}')")
+            conn.commit()
+            conn.close()
         return redirect(url_for('sign_in'))
     return render_template('wrong_access.html') #위에서 sign_up이 되든 안되든 딴 곳으로 감
 
@@ -52,9 +66,17 @@ def auth(ID = None, PW = None):
     if request.method == 'GET':
         pass
     if request.method == "POST":
+
         id = request.form['ID']
         pw = request.form['PW']
-        if id in accounts and accounts[id] == pw:
+        # Get password from sqlite3 db
+        conn = sqlite3.connect(DB_NAME)
+        curr = conn.cursor()
+        passwd = curr \
+            .execute(f"SELECT password FROM account WHERE id = '{id}'") \
+            .fetchone()[0]
+        conn.close()
+        if pw == passwd:
             global signed_id
             signed_id = id
             return redirect(url_for('loggined_main_page', user_id = id))
