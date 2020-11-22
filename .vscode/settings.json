@@ -1,3 +1,4 @@
 {
-    "editor.fontFamily": "'ubuntu', 'Ubuntu-M', 'monospace'"
+    "editor.fontFamily": "'ubuntu', 'Ubuntu-M', 'monospace'",
+    "python.pythonPath": "/home/chayhyeon/Mycommunity/venv/bin/python3"
 }

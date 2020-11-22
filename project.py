@@ -1,4 +1,4 @@
-from flask import Flask, request, url_for, redirect, render_template, send_file
+from flask import Flask, request, url_for, redirect, render_template, send_file, session
 import os, time, threading
 import sqlite3
 
@@ -9,6 +9,7 @@ DB_NAME = "dev_montoring.db"
 
 app = Flask(__name__)
 #app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 #16메가바이트
+app.secret_key = b'6rav3_C00k!e Is Str0n93r than Z0m6!3_c00k13'
 
 cookie = {1 : ['떼탈출 언제하지..', 'a', 0, '떼탈출 재밌긴 한데.. 살짝 귀찮음'], 2 : ['그챔 끝!', 'a', 0, '명랑한 쿠키양은 명랑했다.']}
 cookie_count = 2
@@ -21,6 +22,10 @@ def check_session(id):
     if signed_id != id:
         return render_template('wrong_access.html')
 """ #이렇게 따로 함수를 불러서 하면 안되는걸까?
+
+def session_check(user_id): #얘는 user_id 받아서 html을 올리라고 해주니 이렇게 함수로 선언해도 괜찮다!
+    if not user_id in session['username']:
+        return render_template('wrong_access.html')
 
 @app.route('/')
 def main_page():
@@ -77,31 +82,25 @@ def auth(ID = None, PW = None):
             .fetchone()[0]
         conn.close()
         if pw == passwd:
-            global signed_id
-            signed_id = id
+            session['username'] = request.form['ID']
             return redirect(url_for('loggined_main_page', user_id = id))
     return render_template('login_fail.html')
 
 @app.route('/main/<user_id>/')
 def loggined_main_page(user_id):
     # 앞으로 나오는 아래 세 줄은 세션 유지를 위한 검사
-    global signed_id
-    if signed_id != user_id:
-        return render_template('wrong_access.html')
+    session_check(user_id)
 
     return render_template('loggined_main_page.html', user_id = user_id)
 
 @app.route('/logout')
 def logout():
-    global signed_id
-    signed_id = None
+    session.pop('username', None)
     return redirect(url_for('main_page'))
 
 @app.route('/main/<user_id>/<board_type>')
 def show_board(user_id, board_type):
-    global signed_id
-    if signed_id != user_id:
-        return render_template('wrong_access.html')
+    session_check(user_id)
 
     global cookie, free
     if board_type == 'cookie':
@@ -112,9 +111,7 @@ def show_board(user_id, board_type):
 
 @app.route('/main/<user_id>/<board_type>/<post_num>')
 def show_post(user_id, board_type, post_num):
-    global signed_id
-    if signed_id != user_id:
-        return render_template('wrong_access.html')
+    session_check(user_id)
 
     global cookie, free
     if board_type == 'cookie':
@@ -124,16 +121,12 @@ def show_post(user_id, board_type, post_num):
 
 @app.route('/main/<user_id>/<board_type>/write')
 def show_write(user_id, board_type):
-    global signed_id
-    if signed_id != user_id:
-        return render_template('wrong_access.html')
+    session_check(user_id)
     return render_template('write_post.html', user_id = user_id, board_type = board_type)
 
 @app.route('/main/<user_id>/<board_type>/add_post', methods = ['POST'])
 def add_post(user_id, board_type, Title=None, Content=None):
-    global signed_id
-    if signed_id != user_id:
-        return render_template('wrong_access.html')
+    session_check(user_id)
 
     global cookie, free, cookie_count, free_count
     post = [] #현재 쓴 글에 대한 정보
@@ -166,9 +159,7 @@ def add_post(user_id, board_type, Title=None, Content=None):
 
 @app.route('/main/<user_id>/<board_type>/rewrite/<post_num>')
 def show_rewrite(user_id, board_type, post_num):
-    global signed_id
-    if signed_id != user_id:
-        return render_template('wrong_access.html')
+    session_check(user_id)
 
     if board_type == 'cookie':
         return render_template('rewrite_post.html', user_id = user_id, board_type = board_type, post_num = post_num, data = cookie[int(post_num)-1])
@@ -178,9 +169,7 @@ def show_rewrite(user_id, board_type, post_num):
 
 @app.route('/main/<user_id>/<board_type>/fix_post/<post_num>/<post_index>', methods = ['POST'])
 def fix_post(user_id, board_type, post_num, post_index, Title = None, Content = None):
-    global signed_id
-    if signed_id != user_id:
-        return render_template('wrong_access.html')
+    session_check(user_id)
 
     title = request.form['Title']
     content = request.form['Content']
@@ -198,9 +187,7 @@ def fix_post(user_id, board_type, post_num, post_index, Title = None, Content = 
 
 @app.route('/main/<user_id>/<board_type>/delete/<post_num>', methods = ['POST'])
 def delete(user_id, board_type, post_num, Data = None):
-    global signed_id
-    if signed_id != user_id:
-        return render_template('wrong_access.html')
+    session_check(user_id)
     global cookie, free
     if board_type == 'cookie':
         cookie.pop(int(post_num))
