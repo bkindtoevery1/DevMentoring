@@ -19,12 +19,12 @@
                 <td colspan = "4" valign = "middle">게시글이 없습니다.</td>
             </tr>
         {% else %}
-            {% for key, value in data.items() %}
+            {% for post in data %}
             <tr>
-                <td>{{key}}</td>
-                <td><a href = "http://localhost:5000/main/{{user_id}}/{{board_type}}/{{key}}">{{value[0]}}</a></td>
-                <td>{{value[1]}}</td>
-                <td>{{value[2]}}</td>
+                <td>{{post[0]}}</td>
+                <td><a href = "http://localhost:5000/main/{{user_id}}/{{board_type}}/{{post[0]}}">{{post[1]}}</a></td>
+                <td>{{post[2]}}</td>
+                <td>{{post[3]}}</td>
             </tr>
             {% endfor %}
         {% endif %}
