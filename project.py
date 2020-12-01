@@ -29,7 +29,6 @@ def main_page():
 def sign_up():
     return render_template('sign_up.html')
 
-
 @app.route('/add_account', methods =['POST'])
 def add_account(ID=None, PW=None, PWcheck=None):
     id = request.form['ID']
@@ -83,7 +82,6 @@ def auth(ID = None, PW = None):
 @app.route('/main/<user_id>/')
 def loggined_main_page(user_id):
     session_check(user_id)
-
     return render_template('loggined_main_page.html', 
         user_id = user_id)
 
