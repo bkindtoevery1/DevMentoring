@@ -101,10 +101,9 @@ def show_board(user_id, board_type):
     
     if board_type == 'cookie' or board_type == 'free':
         posts = curr \
-        .execute("SELECT * FROM ?_board ", (board_type)) \
-        .fetchall()
+            .execute("SELECT * FROM {}_board".format(board_type)) \
+            .fetchall()
         conn.close()
-        print(posts)
         return render_template('show_board.html', 
             user_id = user_id, board_type = board_type, num = len(posts), data = posts)
 
@@ -122,7 +121,7 @@ def show_post(user_id, board_type, post_num):
     try:
         if board_type == 'cookie' or board_type == 'free':
             post = curr \
-            .execute("SELECT * FROM ?_board WHERE number = ?", (board_type, post_num)) \
+            .execute("SELECT * FROM {}_board WHERE number = ?".format(board_type), (post_num,)) \
             .fetchone()
             conn.close()
             return render_template('show_post.html',
@@ -159,8 +158,8 @@ def add_post(user_id, board_type, Title=None, Content=None):
     post_num = 0
 
     if board_type == 'cookie' or board_type == 'free':
-        curr.execute("INSERT INTO ?_board (title, author, like, content) VALUES \
-            (?, ?, ?, ?)", (board_type, title, user_id, like, content))
+        curr.execute("INSERT INTO {}_board (title, author, like, content) VALUES \
+            (?, ?, ?, ?)".format(board_type), (title, user_id, like, content))
         conn.commit()
 
         # 방금 INSERT한 친구의 number를 갖고오는 SQLite 내장 함수!
@@ -181,7 +180,7 @@ def show_rewrite(user_id, board_type, post_num):
     curr = conn.cursor()
 
     post = curr \
-        .execute("SELECT * FROM ?_board WHERE number = ?", (board_type, post_num)) \
+        .execute("SELECT * FROM {}_board WHERE number = ?".format(board_type), (post_num,)) \
         .fetchone()
     conn.close()
 
@@ -205,8 +204,8 @@ def fix_post(user_id, board_type, post_num, Title = None, Content = None):
     title = request.form['Title']
     content = request.form['Content']
     if board_type == 'cookie' or board_type == 'free':
-        curr.execute("UPDATE ?_board \
-            SET title = ?, content = ? WHERE number = ?", (board_type, title, content, post_num))
+        curr.execute("UPDATE {}_board \
+            SET title = ?, content = ? WHERE number = ?".format(board_type), (title, content, post_num))
 
         conn.commit()
         conn.close()
@@ -224,7 +223,7 @@ def delete(user_id, board_type, post_num, Data = None):
         conn = sqlite3.connect(DB_NAME)
         curr = conn.cursor()
 
-        curr.execute("DELETE FROM ?_board WHERE number = ?", (board_type, post_num))
+        curr.execute("DELETE FROM {}_board WHERE number = ?".format(board_type), (post_num,))
 
         conn.commit()
         conn.close()
