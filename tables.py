@@ -1,4 +1,4 @@
-import sqlite3
+import sqlite3, bcrypt
 
 
 DB_NAME = "dev_mentoring.db"
@@ -18,11 +18,15 @@ if __name__ == "__main__":
     # 알고 보니 여러 줄 문자열이었던 것이다!
 
     # 가계정 insert
+    salt = bcrypt.gensalt()
+    admin_pw = bcrypt.hashpw('brave'.encode('utf-8'), salt)
+    a_pw = bcrypt.hashpw('a'.encode('utf-8'), salt)
+    NULL_pw = bcrypt.hashpw('d336132dbbd2be791aed44dfdf1ac806efa8ddcab05faff75b6f412ef387cbd944983da12cce87fe0c485ce0fe35790d44e4a87bb532efdd901a19464f653831'.encode('utf-8'), salt)
     c.execute('''INSERT INTO account VALUES 
-        ('admin', 'brave'), 
-        ('a', 'a'),
-        ('NULL', 'd336132dbbd2be791aed44dfdf1ac806efa8ddcab05faff75b6f412ef387cbd944983da12cce87fe0c485ce0fe35790d44e4a87bb532efdd901a19464f653831')
-    ''')
+        ('admin', ?), 
+        ('a', ?),
+        ('NULL', ?)
+    ''', (admin_pw.decode('utf-8'), a_pw.decode('utf-8'), NULL_pw.decode('utf-8')))
     # NULL의 비밀번호는 NULL...을 SHA-512로 암호화한 것!
 
     #Create Boards
