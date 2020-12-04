@@ -54,7 +54,31 @@ if __name__ == "__main__":
         ('그챔 끝!', 'a', 0, '명랑한 쿠키양은 명랑했다.')
     ''')
 
-    # create meta-datas like global variables
+    # create table of cookie names
+    c.execute('''CREATE TABLE IF NOT EXISTS random_cookie (
+        number integer PRIMARY KEY,
+        cookie text
+    )''')
+
+    c.execute('''INSERT INTO random_cookie (number, cookie) VALUES
+        (0, 'brave_cookie'),
+        (1, 'moonlight_cookie'),
+        (2, 'popping_candy_cookie'),
+        (3, 'timekeeper_cookie'),
+        (4, 'croissant_cookie'),
+        (5, 'space_doughnut'),
+        (6, 'sorbet_shark_cookie'),
+        (7, 'sea_fairy_cookie'),
+        (8, 'cocoa_cookie'),
+        (9, 'DJ_cookie')
+    ''')
+
+    #create table of logs
+    c.execute('''CREATE TABLE IF NOT EXISTS log (
+        user_id text PRIMARY KEY,
+        datetime text,
+        random_cookie integer
+    )''')
 
     conn.commit()
 

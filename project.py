@@ -1,5 +1,8 @@
-from flask import Flask, request, url_for, redirect, render_template, send_file, session
-import os, time, threading, sqlite3, bcrypt
+from flask import Flask, request, url_for, redirect, render_template, send_file, session, make_response
+import os, threading, sqlite3, bcrypt
+from hashlib import sha256
+from datetime import datetime, timedelta
+from random import randint
 
 lock = threading.Lock()
 
@@ -7,17 +10,48 @@ lock = threading.Lock()
 DB_NAME = "dev_mentoring.db"
 
 app = Flask(__name__)
+
 #app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 #16메가바이트
 
-app.secret_key = b'6rav3_C00k!e Is Str0n93r than Z0m6!3_c00k13'
 salt = bcrypt.gensalt()
 
-def session_check(user_id): #얘는 user_id 받아서 html을 올리라고 해주니 이렇게 함수로 선언해도 괜찮다!
-    try:
-        if user_id in session['username']:
-            return True
-    except:
-         return render_template('wrong_access.html')
+app.secret_key = '6rav3_C00k!e Is Str0n93r than Z0m6!3_c00k13'
+
+
+def gen_hash(user_id):
+    conn = sqlite3.connect(DB_NAME)
+    curr = conn.cursor()
+    rand = randint(0, 9)
+    random_cookie = curr \
+        .execute('''SELECT cookie from random_cookie WHERE number = ?''', (rand,)) \
+        .fetchone()[0]
+    hash = bcrypt.hashpw((user_id + random_cookie).encode(), salt) \
+        .decode()
+    return hash, rand
+
+
+def check_session():
+    #get cookie, id info
+    value = request.cookies.get('session')
+    length = int(value[0])
+    id = value[1:1+length]
+    #get hash for user
+    conn = sqlite3.connect(DB_NAME)
+    curr = conn.cursor()
+    
+    user_log = curr.execute('''
+            SELECT * FROM log WHERE user_id = ?
+        ''', (id,)) \
+            .fetchone()
+    if user_log is None:
+        return False
+
+    rand = user_log[2]
+    random_cookie = curr \
+        .execute('''SELECT cookie from random_cookie WHERE number = ?''', (rand,)) \
+        .fetchone[0]
+    check = user_log[0] + user_log[1] + random_cookie
+    # not complete
 
 
 @app.route('/')
@@ -28,6 +62,7 @@ def main_page():
 @app.route('/sign_up/')
 def sign_up():
     return render_template('sign_up.html')
+
 
 @app.route('/add_account', methods =['POST'])
 def add_account(ID=None, PW=None, PWcheck=None):
@@ -72,17 +107,25 @@ def auth(ID = None, PW = None):
         .fetchone()[0]
     conn.close()
     if bcrypt.checkpw(pw.encode('utf-8'), passwd.encode('utf-8')):
-        session['username'] = id
-        return redirect(url_for('loggined_main_page', 
-            user_id = id))
+        logged_main_page = make_response(url_for('logged_main_page', user_id = id))
+        #set_cookie -> error!
+        (hashed_id, rand) = gen_hash(id)
+        logged_main_page.set_cookie('session', hashed_id)
+        print(hashed_id)
+        print(request.cookies.get('session'))
+        return redirect(url_for('logged_main_page', user_id = id))
 
     return render_template('login_fail.html')
 
 
-@app.route('/main/<user_id>/')
-def loggined_main_page(user_id):
-    session_check(user_id)
-    return render_template('loggined_main_page.html', 
+@app.route('/main/<user_id>')
+def logged_main_page(user_id):
+    #session_check(user_id)
+    cookie = request.cookies.get('session')
+    ret = make_response(render_template('logged_main_page.html', 
+        user_id = user_id))
+    ret.set_cookie('session', cookie)
+    return render_template('logged_main_page.html', 
         user_id = user_id)
 
 
